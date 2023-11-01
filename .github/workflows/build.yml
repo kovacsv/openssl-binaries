@@ -36,10 +36,46 @@ jobs:
       run: |
         mkdir package
         mkdir package\lib
+        mkdir package\include
         copy /Y openssl\libcrypto_static.lib package\lib\libcrypto_static.lib
         copy /Y openssl\libssl_static.lib package\lib\libssl_static.lib
         xcopy /I openssl\include\openssl package\include\openssl
         7z a -tzip windows-${{ matrix.openssl-version }}-${{ matrix.configuration }}-${{ matrix.platform-toolset }}.zip .\package\*
+    - name: Release
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: ncipollo/release-action@v1
+      with:
+        artifacts: "*.zip"
+        allowUpdates: true
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+  macos-build:
+
+    runs-on: macos-12
+    
+    strategy:
+      matrix:
+        openssl-version: [openssl-3.0.12]
+        configuration: [darwin64-x86_64, darwin64-arm64]
+
+    steps:
+    - name: Checkout source
+      uses: actions/checkout@v3
+    - name: Build
+      run: |
+        git clone https://github.com/openssl/openssl.git -b ${{ matrix.openssl-version }} --depth=1
+        cd openssl
+        ./Configure ${{ matrix.configuration }} no-zlib no-tests
+        make
+    - name: Package
+      run: |
+        mkdir package
+        mkdir package/lib
+        mkdir package/include
+        cp openssl/libcrypto.a package/lib/libcrypto.a
+        cp openssl/libssl.a package/lib/libssl.a
+        cp -r openssl/include/openssl/. package/include/openssl
+        7z a -tzip macos-${{ matrix.openssl-version }}-${{ matrix.configuration }}.zip ./package/*
     - name: Release
       if: startsWith(github.ref, 'refs/tags/')
       uses: ncipollo/release-action@v1
