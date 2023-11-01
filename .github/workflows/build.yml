@@ -39,9 +39,11 @@ jobs:
         mkdir package
         mkdir package\lib
         mkdir package\include
+        mkdir package\include\openssl
         copy /Y openssl\build\libcrypto_static.lib package\lib\libcrypto_static.lib
         copy /Y openssl\build\libssl_static.lib package\lib\libssl_static.lib
-        xcopy /I openssl\build\include\openssl package\include\openssl
+        copy /Y openssl\include\openssl\*.h package\include\openssl
+        copy /Y openssl\build\include\openssl\*.h package\include\openssl
         7z a -tzip windows-${{ matrix.openssl-version }}-${{ matrix.configuration }}-${{ matrix.platform-toolset }}.zip .\package\*
     - name: Release
       if: startsWith(github.ref, 'refs/tags/')
@@ -76,9 +78,11 @@ jobs:
         mkdir package
         mkdir package/lib
         mkdir package/include
+        mkdir package/include/openssl
         cp openssl/build/libcrypto.a package/lib/libcrypto.a
         cp openssl/build/libssl.a package/lib/libssl.a
-        cp -r openssl/build/include/openssl/. package/include/openssl
+        cp openssl/include/openssl/*.h package/include/openssl
+        cp openssl/build/include/openssl/*.h package/include/openssl
         7z a -tzip macos-${{ matrix.openssl-version }}-${{ matrix.configuration }}.zip ./package/*
     - name: Release
       if: startsWith(github.ref, 'refs/tags/')
@@ -121,9 +125,11 @@ jobs:
         mkdir package
         mkdir package/lib
         mkdir package/include
+        mkdir package/include/openssl
         cp openssl/build/libcrypto.a package/lib/libcrypto.a
         cp openssl/build/libssl.a package/lib/libssl.a
-        cp -r openssl/build-x64/include/openssl/. package/include/openssl
+        cp openssl/include/openssl/*.h package/include/openssl
+        cp openssl/build-x64/include/openssl/*.h package/include/openssl
         7z a -tzip macos-${{ matrix.openssl-version }}-x86_64-arm64-ub.zip ./package/*
     - name: Release
       if: startsWith(github.ref, 'refs/tags/')
